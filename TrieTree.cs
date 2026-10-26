@@ -28,30 +28,6 @@ namespace AtCoder_CS_Template.Classes
             node.IsEnd = true;
         }
 
-        // 完全一致検索
-        public bool Search(string s)
-        {
-            Node node = root;
-            foreach (char c in s)
-            {
-                if (!node.Children.TryGetValue(c, out Node? next)) return false;
-                node = next;
-            }
-            return node.IsEnd;
-        }
-
-        // 接頭辞検索
-        public bool StartsWith(string prefix)
-        {
-            Node node = root;
-            foreach (char c in prefix)
-            {
-                if (!node.Children.TryGetValue(c, out Node? next)) return false;
-                node = next;
-            }
-            return true;
-        }
-
         // 文字列の削除
         public bool Remove(string s)
         {
@@ -77,6 +53,68 @@ namespace AtCoder_CS_Template.Classes
             if (deleteNode) node.Children.Remove(c);
 
             return (removed, !node.IsEnd && node.Children.Count == 0);
+        }
+
+        // 完全一致検索
+        public bool Search(string s)
+        {
+            Node node = root;
+            foreach (char c in s)
+            {
+                if (!node.Children.TryGetValue(c, out Node? next)) return false;
+                node = next;
+            }
+            return node.IsEnd;
+        }
+
+        // 接頭辞検索
+        public bool StartsWith(string prefix)
+        {
+            Node node = root;
+            foreach (char c in prefix)
+            {
+                if (!node.Children.TryGetValue(c, out Node? next)) return false;
+                node = next;
+            }
+            return true;
+        }
+
+        // sの部分文字列のうち、Trie木に登録されているものの個数
+        // includeWhole: s全体と一致する場合もカウントする
+        // countDuplicates: 同じ文字列が複数回出現した場合もそれぞれカウントする
+        public int CountSubstrings(
+            string s,
+            bool includeWhole = true,
+            bool countDuplicates = false)
+        {
+            HashSet<Node> found = new();
+            int count = 0;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                Node node = root;
+
+                for (int j = i; j < s.Length; j++)
+                {
+                    if (!node.Children.TryGetValue(s[j], out Node? next))
+                        break;
+
+                    node = next;
+
+                    if (!node.IsEnd) continue;
+
+                    // 文字列全体との一致を除外する場合
+                    if (!includeWhole && i == 0 && j == s.Length - 1)
+                        continue;
+
+                    if (countDuplicates || found.Add(node))
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
         }
     }
 }
